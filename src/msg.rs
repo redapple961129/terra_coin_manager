@@ -1,4 +1,4 @@
-use cosmwasm_std::{Uint128, HumanAddr};
+use cosmwasm_std::{Uint128, Addr};
 use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -21,8 +21,8 @@ pub enum ExecuteMsg {
     },
     /// Receive forwards received cw20 tokens to an execution logic
     Receive(Cw20ReceiveMsg),
-    AddProject { project_id: u32, project_wallet: HumanAddr},
-    Back2Project { project_id: u32, backer_wallet: HumanAddr},
+    AddProject { project_id: u32, project_wallet: Addr},
+    Back2Project { project_id: u32, backer_wallet: Addr},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

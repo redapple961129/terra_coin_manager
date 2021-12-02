@@ -2,7 +2,7 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
     from_binary, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
-    Uint128, HumanAddr, CosmosMsg, BankMsg, 
+    Uint128, CosmosMsg, BankMsg, 
 };
 use cw2::set_contract_version;
 
@@ -58,14 +58,14 @@ pub fn execute(
         } => execute_create_pot(deps, info, target_addr, threshold),
         ExecuteMsg::Receive(msg) => execute_receive(deps, info, msg),
         ExecuteMsg::AddProject { project_id, project_wallet } => 
-            try_addproject(deps, info, project_id, project_wallet),
+            try_addproject(project_id, project_wallet),
         ExecuteMsg::Back2Project { project_id, backer_wallet } => 
-            try_back2project(deps, _env, info, project_id, backer_wallet),
+            try_back2project(info, project_id, backer_wallet),
     }
 }
-pub fn try_addproject(deps: DepsMut, info: MessageInfo,
+pub fn try_addproject(
     _project_id:u32, 
-    _project_wallet:HumanAddr,
+    _project_wallet:Addr,
 ) -> Result<Response, ContractError> 
 {
     for project in PROJECTSTATES {
@@ -86,9 +86,9 @@ pub fn try_addproject(deps: DepsMut, info: MessageInfo,
     Ok(Response::new()
         .add_attribute("action", "add project"))
 }
-pub fn try_back2project(deps: DepsMut, env: Env, info: MessageInfo,
+pub fn try_back2project(info: MessageInfo,
     _project_id:u32, 
-    _backer_wallet:HumanAddr
+    _backer_wallet:Addr
 ) -> Result<Response, ContractError> 
 {
     let mut x = PROJECTSTATES[0].clone();

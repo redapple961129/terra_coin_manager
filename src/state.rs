@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::{Addr, DepsMut, StdResult, Uint128, HumanAddr, Coin};
+use cosmwasm_std::{Addr, DepsMut, StdResult, Uint128, Coin};
 use cw_storage_plus::{Item, Map, U128Key};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -37,14 +37,14 @@ pub fn save_pot(deps: DepsMut, pot: &Pot) -> StdResult<()> {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct BackerState{
-    pub backer_wallet: HumanAddr,
+    pub backer_wallet: Addr,
     pub amount: Coin,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ProjectState{
     pub project_id: u32,
-    pub project_wallet: HumanAddr,
+    pub project_wallet: Addr,
     pub backer_states: Vec<BackerState>,
 }
 pub const PROJECTSTATES: Vec<ProjectState> = Vec::new();

@@ -3,8 +3,8 @@ use std::fs::create_dir_all;
 
 use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 
-use cw20_pot::msg::{ExecuteMsg, InstantiateMsg, PotResponse, QueryMsg};
-use cw20_pot::state::{Config, Pot};
+use terra_coin_manager::msg::{ExecuteMsg, InstantiateMsg, PotResponse, QueryMsg};
+use terra_coin_manager::state::{Config, Pot};
 
 fn main() {
     let mut out_dir = current_dir().unwrap();
