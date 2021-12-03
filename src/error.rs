@@ -8,6 +8,12 @@ pub enum ContractError {
 
     #[error("Unauthorized")]
     Unauthorized {},
+
+    #[error("Prject id is already registerd")]
+    AlreadyRegistered {},
+
+    #[error("Prject id is not registerd yet")]
+    NotRegistered {},
     // Add any other custom errors you like here.
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }

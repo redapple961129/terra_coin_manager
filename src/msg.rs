@@ -1,4 +1,4 @@
-use cosmwasm_std::{Uint128, Addr};
+use cosmwasm_std::{Uint128};
 use cw20::Cw20ReceiveMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -21,8 +21,8 @@ pub enum ExecuteMsg {
     },
     /// Receive forwards received cw20 tokens to an execution logic
     Receive(Cw20ReceiveMsg),
-    AddProject { project_id: u32, project_wallet: Addr},
-    Back2Project { project_id: u32, backer_wallet: Addr},
+    AddProject { project_id: Uint128, project_wallet: String},
+    Back2Project { project_id: Uint128, backer_wallet: String},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -37,6 +37,7 @@ pub enum ReceiveMsg {
 pub enum QueryMsg {
     // GetPot returns pot with given id
     GetPot { id: Uint128 },
+    GetProject { id:Uint128 },
 }
 
 // We define a custom struct for each query response
@@ -48,4 +49,10 @@ pub struct PotResponse {
     pub threshold: Uint128,
     /// collected keeps information on how much is collected for this pot.
     pub collected: Uint128,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct ProjectResponse{
+    pub project_id: Uint128,
+    pub project_wallet: String,
 }

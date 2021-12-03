@@ -37,14 +37,16 @@ pub fn save_pot(deps: DepsMut, pot: &Pot) -> StdResult<()> {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct BackerState{
-    pub backer_wallet: Addr,
+    pub backer_wallet: String,
     pub amount: Coin,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ProjectState{
-    pub project_id: u32,
-    pub project_wallet: Addr,
+    pub project_id: Uint128,
+    pub project_wallet: String,
     pub backer_states: Vec<BackerState>,
 }
-pub const PROJECTSTATES: Vec<ProjectState> = Vec::new();
+
+//pub const ProjectState_SEQ: Item<Uint128> = Item::new("prj_seq");
+pub const PROJECTSTATES: Map<U128Key, ProjectState> = Map::new("prj");
