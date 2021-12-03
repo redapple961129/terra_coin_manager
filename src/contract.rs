@@ -306,13 +306,25 @@ mod tests {
         let _res = instantiate(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
 //add contract
         let msg = ExecuteMsg::AddContract{
-            contract:String::from("some"),
+            contract:String::from("wersome1"),
+        };
+        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
+        
+        let msg = ExecuteMsg::AddContract{
+            contract:String::from("wersome2"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
         
 //add project        
         let msg = ExecuteMsg::AddProject{
             project_id: Uint128::new(100),
+            project_wallet: String::from("some"),
+        };
+        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
+        assert_eq!(res.messages.len(), 0);
+
+        let msg = ExecuteMsg::AddProject{
+            project_id: Uint128::new(101),
             project_wallet: String::from("some"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
@@ -333,10 +345,11 @@ mod tests {
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
         assert_eq!(res.messages.len(), 0);
    
-        // let msg = QueryMsg::GetProject{id:Uint128::new(100)};
-        // let res = query(deps.as_ref(), mock_env(), msg).unwrap();
-
-        // let prj:ProjectResponse = from_binary(&res).unwrap();
+        let msg = QueryMsg::GetProject{id:Uint128::new(101)};
+        let res = query(deps.as_ref(), mock_env(), msg).unwrap();
+        
+        let prj:ProjectResponse = from_binary(&res).unwrap();
+        println!("project {:?}:{:?}", prj.project_id, prj.project_wallet );
         // assert_eq!(
         //     prj,
         //     ProjectResponse{
