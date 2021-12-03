@@ -40,13 +40,16 @@ pub struct BackerState{
     pub backer_wallet: String,
     pub amount: Coin,
 }
+// pub const BACKERSTATES: Map<U128Key, BackerState> = Map::new("backer");
+// pub const BACKERSTATE_SEQ: Item<Uint128> = Item::new("backer_seq");
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct ProjectState{
     pub project_id: Uint128,
     pub project_wallet: String,
-    pub backer_states: Vec<BackerState>,
+    pub backer_states:Vec<BackerState>,
 }
 
 //pub const ProjectState_SEQ: Item<Uint128> = Item::new("prj_seq");
 pub const PROJECTSTATES: Map<U128Key, ProjectState> = Map::new("prj");
+pub const PROJECTCONTRACTS: Map<String, bool> = Map::new("proj_contracts");

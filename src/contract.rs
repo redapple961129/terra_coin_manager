@@ -2,7 +2,7 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
     from_binary, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
-    Uint128, CosmosMsg, BankMsg,
+    Uint128, CosmosMsg, BankMsg, Coin, WasmMsg, wasm_execute
 };
 use cw2::set_contract_version;
 
@@ -10,10 +10,8 @@ use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, PotResponse, QueryMsg, ReceiveMsg, 
     ProjectResponse};
 use crate::state::{save_pot, Config, Pot, CONFIG, POTS, POT_SEQ,
-    PROJECTSTATES, ProjectState, BackerState};
+    PROJECTSTATES, ProjectState, BackerState, PROJECTCONTRACTS};
 use cw20::{Cw20Contract, Cw20ExecuteMsg, Cw20ReceiveMsg};
-
-use std::convert::TryFrom;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw20-example";
@@ -64,7 +62,19 @@ pub fn execute(
             try_addproject(deps, project_id, project_wallet),
         ExecuteMsg::Back2Project { project_id, backer_wallet } => 
             try_back2project(deps, info, project_id, backer_wallet),
+        ExecuteMsg::AddContract { contract } => try_addcontract(deps, contract),
     }
+}
+pub fn try_addcontract(deps:DepsMut, contract:String)->Result<Response, ContractError>
+{
+    let res = PROJECTCONTRACTS.may_load(deps.storage, contract.clone());
+    if res != Ok(None){ //exist
+        return Err(ContractError::AlreadyRegisteredContract{});
+    }
+    let bfree:bool = false;
+    PROJECTCONTRACTS.save(deps.storage, contract, &bfree)?;
+    Ok(Response::new()
+        .add_attribute("action", "add contract"))
 }
 pub fn try_addproject(
     deps:DepsMut,
@@ -73,14 +83,32 @@ pub fn try_addproject(
 ) -> Result<Response, ContractError> 
 {
     let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into());
-    if res != Ok(None) {
-        return Err(ContractError::AlreadyRegistered {});
+    if res != Ok(None) {//exist
+        return Err(ContractError::AlreadyRegisteredProject {});
+    }
+
+    let all: StdResult<Vec<_>> = PROJECTCONTRACTS.range(deps.storage, None, None, 
+        cosmwasm_std::Order::Ascending).collect();
+    let all = all.unwrap();
+    let mut prj_wallet:String = "".to_string();
+    for x in all{
+        if x.1 == false{
+            prj_wallet = String::from_utf8(x.0).unwrap();
+
+            //convert to true on Map<Address, bool>
+            let act = |a: Option<bool>| -> StdResult<_> { Ok(true) };
+            PROJECTCONTRACTS.update(deps.storage, prj_wallet.clone(), act)?;
+            break;
+        }
+    }
+    if prj_wallet == "" {
+        return Err(ContractError::NOTFOUNDAVAILABLEPROJECTCONTRACT{});
     }
 
     let backer_states = Vec::new();
     let new_project:ProjectState = ProjectState{
         project_id:_project_id, 
-        project_wallet:_project_wallet,
+        project_wallet:prj_wallet,
         backer_states};
         
     PROJECTSTATES.save(deps.storage, _project_id.u128().into(), &new_project)?;
@@ -93,26 +121,27 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
     _backer_wallet:String
 ) -> Result<Response, ContractError> 
 {
-    let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into()).unwrap();
-    if res != None { //not exist
-        return Err(ContractError::NotRegistered {});
+    let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into());
+    if res == Ok(None) { //not exist
+        return Err(ContractError::NotRegisteredProject {});
     }
 
     if info.funds.is_empty() {
-        return Err(ContractError::Unauthorized {});
+        return Err(ContractError::NeedCoin{});
     }
 
     let mut x = PROJECTSTATES.load(deps.storage, _project_id.u128().into())?;
     
     let to_address = x.project_wallet.clone();
-
-    let amount = info.funds[0].clone();
+    let amount = info.funds[0].clone();//Coin::new(123, "ucosm");//
 
     let bank = BankMsg::Send { to_address: to_address.to_string(), amount: info.funds };
-    let msg: CosmosMsg = bank.clone().into();
-    match msg {
-        CosmosMsg::Bank(msg) => assert_eq!(bank, msg),
-        _ => panic!("must encode in Bank variant"),
+    let res:Response = Response::new()
+        .add_messages(vec![CosmosMsg::Bank(bank)]);
+
+    if res.messages.len() == 0 {
+        return Err(ContractError::COULDNOTTRANSFER {});
+        //println!("{:?}", res.messages);
     }
 
     let new_baker:BackerState = BackerState{
@@ -122,8 +151,32 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
 
     x.backer_states.push(new_baker);
 
+    let act = |a: Option<ProjectState>| -> StdResult<ProjectState> { 
+        Ok(ProjectState {
+            project_wallet: a.clone().unwrap().project_wallet,
+            project_id: a.clone().unwrap().project_id,
+            backer_states: x.backer_states,
+        })
+    };
+
+    // let act = |d: Option<ProjectState>| -> StdResult<ProjectState> {
+    //     match d {
+    //         Some(one) => Ok(ProjectState {
+    //             project_wallet: one.project_wallet,
+    //             project_id: one.project_id,
+    //             backer_states: x.backer_states,
+    //         }),
+    //         None => Ok(ProjectState {
+    //             project_wallet: "0".into(),
+    //             project_id: Uint128::new(0),
+    //             backer_states: Vec::new(),
+    //         }),
+    //     }
+    // };
+
+    PROJECTSTATES.update(deps.storage, _project_id.u128().into(), act)?;
     Ok(Response::new()
-        .add_attribute("action", "execute_create_pot")
+        .add_attribute("action", "add backer to project")
     )
 }
 pub fn execute_create_pot(
@@ -205,10 +258,16 @@ pub fn receive_send(
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::GetPot { id } => to_binary(&query_pot(deps, id)?),
-        QueryMsg::GetProject{ id } => to_binary(&query_project(deps, id)?)
+        QueryMsg::GetProject{ id } => to_binary(&query_project(deps, id)?),
+        QueryMsg::GetBacker{ id } => to_binary(&query_backer(deps, id)?),
     }
 }
+fn query_backer(deps:Deps, id:Uint128) -> StdResult<usize>{
+    let x = PROJECTSTATES.load(deps.storage, id.u128().into())?;
+    let res = x.backer_states.len();
 
+    Ok(res)
+}
 fn query_project(deps:Deps, id:Uint128) -> StdResult<ProjectResponse>{
     let x = PROJECTSTATES.load(deps.storage, id.u128().into())?;
     
@@ -245,7 +304,13 @@ mod tests {
 
         let info = mock_info("creator", &[]);
         let _res = instantiate(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
-
+//add contract
+        let msg = ExecuteMsg::AddContract{
+            contract:String::from("some"),
+        };
+        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
+        
+//add project        
         let msg = ExecuteMsg::AddProject{
             project_id: Uint128::new(100),
             project_wallet: String::from("some"),
@@ -253,24 +318,37 @@ mod tests {
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
         assert_eq!(res.messages.len(), 0);
 
-        let msg = ExecuteMsg::AddProject{
-            project_id: Uint128::new(98),
-            project_wallet: String::from("some"),
+//back 2 projct
+        let msg = ExecuteMsg::Back2Project{
+            project_id: Uint128::new(100),
+            backer_wallet: String::from("some"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
         assert_eq!(res.messages.len(), 0);
+        
+        let msg = ExecuteMsg::Back2Project{
+            project_id: Uint128::new(100),
+            backer_wallet: String::from("some"),
+        };
+        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
+        assert_eq!(res.messages.len(), 0);
+   
+        // let msg = QueryMsg::GetProject{id:Uint128::new(100)};
+        // let res = query(deps.as_ref(), mock_env(), msg).unwrap();
 
-        let msg = QueryMsg::GetProject{id:Uint128::new(98)};
+        // let prj:ProjectResponse = from_binary(&res).unwrap();
+        // assert_eq!(
+        //     prj,
+        //     ProjectResponse{
+        //         project_id: Uint128::new(98),
+        //         project_wallet: String::from("some"),                
+        //     }
+        // )
+
+        let msg = QueryMsg::GetBacker{id:Uint128::new(100)};
         let res = query(deps.as_ref(), mock_env(), msg).unwrap();
-
-        let prj:ProjectResponse = from_binary(&res).unwrap();
-        assert_eq!(
-            prj,
-            ProjectResponse{
-                project_id: Uint128::new(98),
-                project_wallet: String::from("some"),                
-            }
-        )
+        let nlen:usize = from_binary(&res).unwrap();
+        println!("backer count = {:?}", nlen);
     }
     #[test]
     fn create_pot() {

@@ -9,11 +9,23 @@ pub enum ContractError {
     #[error("Unauthorized")]
     Unauthorized {},
 
-    #[error("Prject id is already registerd")]
-    AlreadyRegistered {},
+    #[error("Project id is already registerd")]
+    AlreadyRegisteredProject {},
 
-    #[error("Prject id is not registerd yet")]
-    NotRegistered {},
+    #[error("Project id is not registerd yet")]
+    NotRegisteredProject {},
+
+    #[error("Need some coin")]
+    NeedCoin{},
+
+    #[error("Could not transfer")]
+    COULDNOTTRANSFER{},
+
+    #[error("Contract Address is alreay registered")]
+    AlreadyRegisteredContract{},
+
+    #[error("Not Found Available Project Contract Address")]
+    NOTFOUNDAVAILABLEPROJECTCONTRACT{},
     // Add any other custom errors you like here.
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }

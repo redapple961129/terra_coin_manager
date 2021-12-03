@@ -23,6 +23,7 @@ pub enum ExecuteMsg {
     Receive(Cw20ReceiveMsg),
     AddProject { project_id: Uint128, project_wallet: String},
     Back2Project { project_id: Uint128, backer_wallet: String},
+    AddContract { contract: String},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -38,6 +39,7 @@ pub enum QueryMsg {
     // GetPot returns pot with given id
     GetPot { id: Uint128 },
     GetProject { id:Uint128 },
+    GetBacker{ id:Uint128},
 }
 
 // We define a custom struct for each query response
@@ -56,3 +58,10 @@ pub struct ProjectResponse{
     pub project_id: Uint128,
     pub project_wallet: String,
 }
+
+// #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+// pub struct BackerResponse{
+//     pub project_id:Uint128,
+//     pub baker_wallet: String,
+//     pub amount: Coin,
+// }
