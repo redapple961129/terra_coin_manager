@@ -2,7 +2,8 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
     from_binary, to_binary, Addr, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
-    Uint128, CosmosMsg, BankMsg, Coin, WasmMsg, wasm_execute
+    Uint128, CosmosMsg, BankMsg, Coin, WasmMsg, wasm_execute, QueryRequest,
+    QuerierWrapper, BalanceResponse, BankQuery,
 };
 use cw2::set_contract_version;
 
@@ -126,27 +127,20 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
         return Err(ContractError::NotRegisteredProject {});
     }
 
-    if info.funds.is_empty() {
-        return Err(ContractError::NeedCoin{});
-    }
+    // if info.funds.is_empty() {
+    //     return Err(ContractError::NeedCoin{});
+    // }
 
     let mut x = PROJECTSTATES.load(deps.storage, _project_id.u128().into())?;
     
     let to_address = x.project_wallet.clone();
-    let amount = info.funds[0].clone();//Coin::new(123, "ucosm");//
 
-    let bank = BankMsg::Send { to_address: to_address.to_string(), amount: info.funds };
-    let res:Response = Response::new()
-        .add_messages(vec![CosmosMsg::Bank(bank)]);
+    let coin = Coin::new(123, "ucosm");//info.funds[0].clone();//
+    let amount = vec![coin.clone()];
 
-    if res.messages.len() == 0 {
-        return Err(ContractError::COULDNOTTRANSFER {});
-        //println!("{:?}", res.messages);
-    }
-
-    let new_baker:BackerState = BackerState{
+     let new_baker:BackerState = BackerState{
         backer_wallet:_backer_wallet,
-        amount: amount,
+        amount: coin,
     };
 
     x.backer_states.push(new_baker);
@@ -175,8 +169,23 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
     // };
 
     PROJECTSTATES.update(deps.storage, _project_id.u128().into(), act)?;
+
+    let denom = String::from("ucosm");
+    let balance: BalanceResponse = deps.querier.query(
+        &QueryRequest::Bank(BankQuery::Balance {
+            address: to_address.clone().to_string(),
+            denom,
+        }
+    ))?;
+
+    let bank = BankMsg::Send { to_address: to_address.to_string(), 
+        amount: amount };
+
     Ok(Response::new()
-        .add_attribute("action", "add backer to project")
+    .add_messages(vec![CosmosMsg::Bank(bank)])
+    .add_attribute("action", "back to project")
+    .add_attribute("receive", to_address.to_string())
+    .add_attribute("balance", balance.amount.amount)
     )
 }
 pub fn execute_create_pot(
@@ -290,9 +299,10 @@ fn query_pot(deps: Deps, id: Uint128) -> StdResult<PotResponse> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info, MOCK_CONTRACT_ADDR};
-    use cosmwasm_std::{from_binary, Addr, CosmosMsg, WasmMsg};
-
+    use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info, 
+        MOCK_CONTRACT_ADDR, MockQuerier};
+    use cosmwasm_std::{from_binary, Addr, CosmosMsg, WasmMsg,
+        BankQuery, BalanceResponse, };
     #[test]
     fn add_project(){
         let mut deps = mock_dependencies(&[]);
@@ -309,12 +319,13 @@ mod tests {
             contract:String::from("wersome1"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
-        
+        assert_eq!(res.messages.len(), 0);
+
         let msg = ExecuteMsg::AddContract{
             contract:String::from("wersome2"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
-        
+        assert_eq!(res.messages.len(), 0);
 //add project        
         let msg = ExecuteMsg::AddProject{
             project_id: Uint128::new(100),
@@ -327,8 +338,9 @@ mod tests {
             project_id: Uint128::new(101),
             project_wallet: String::from("some"),
         };
-        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
+        let res = execute(deps.as_mut(), mock_env(), info.clone(), msg.clone()).unwrap();
         assert_eq!(res.messages.len(), 0);
+//balance
 
 //back 2 projct
         let msg = ExecuteMsg::Back2Project{
@@ -336,15 +348,19 @@ mod tests {
             backer_wallet: String::from("some"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
-        assert_eq!(res.messages.len(), 0);
+println!("before balance:{:?}", res.messages);
+        // assert_eq!(res.messages.len(), 0);
         
         let msg = ExecuteMsg::Back2Project{
             project_id: Uint128::new(100),
             backer_wallet: String::from("some"),
         };
         let res = execute(deps.as_mut(), mock_env(), info.clone(), msg).unwrap();
-        assert_eq!(res.messages.len(), 0);
-   
+        // assert_eq!(res.messages.len(), 0);
+println!("after balance:{:?}", res);           
+
+
+//Get Project
         let msg = QueryMsg::GetProject{id:Uint128::new(101)};
         let res = query(deps.as_ref(), mock_env(), msg).unwrap();
         
