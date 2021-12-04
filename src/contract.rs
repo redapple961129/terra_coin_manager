@@ -127,16 +127,16 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
         return Err(ContractError::NotRegisteredProject {});
     }
 
-    // if info.funds.is_empty() {
-    //     return Err(ContractError::NeedCoin{});
-    // }
+    if info.funds.is_empty() {
+        return Err(ContractError::NeedCoin{});
+    }
 
     let mut x = PROJECTSTATES.load(deps.storage, _project_id.u128().into())?;
     
     let to_address = x.project_wallet.clone();
 
-    let coin = Coin::new(123, "ucosm");//info.funds[0].clone();//
-    let amount = vec![coin.clone()];
+    let coin = info.funds[0].clone();//Coin::new(123, "ucosm");//
+    // let amount = vec![coin.clone()];
 
      let new_baker:BackerState = BackerState{
         backer_wallet:_backer_wallet,
@@ -170,22 +170,22 @@ pub fn try_back2project(deps:DepsMut, info: MessageInfo,
 
     PROJECTSTATES.update(deps.storage, _project_id.u128().into(), act)?;
 
-    let denom = String::from("ucosm");
-    let balance: BalanceResponse = deps.querier.query(
-        &QueryRequest::Bank(BankQuery::Balance {
-            address: to_address.clone().to_string(),
-            denom,
-        }
-    ))?;
+    // let denom = String::from("ucosm");
+    // let balance: BalanceResponse = deps.querier.query(
+    //     &QueryRequest::Bank(BankQuery::Balance {
+    //         address: to_address.clone().to_string(),
+    //         denom,
+    //     }
+    // ))?;
 
     let bank = BankMsg::Send { to_address: to_address.to_string(), 
-        amount: amount };
+        amount: info.funds };
 
     Ok(Response::new()
     .add_messages(vec![CosmosMsg::Bank(bank)])
     .add_attribute("action", "back to project")
     .add_attribute("receive", to_address.to_string())
-    .add_attribute("balance", balance.amount.amount)
+    // .add_attribute("balance", balance.amount.amount)
     )
 }
 pub fn execute_create_pot(
