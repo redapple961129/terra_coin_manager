@@ -11,6 +11,11 @@ use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg, ProjectResponse};
 use crate::state::{Config, CONFIG, PROJECTSTATES, ProjectState, BackerState};
 
+use terra_rust_api::{Terra, GasOptions, PrivateKey};
+use terra_rust_api::core_types::{Coin, StdSignMsg, StdSignature};
+use terra_rust_api::messages::{MsgSend, Message};
+use bitcoin::secp256k1::Secp256k1;
+
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw20-example";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
