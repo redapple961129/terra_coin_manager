@@ -41,12 +41,13 @@ optimize = """docker run --rm -v "$(pwd)":/code \
 
 [dependencies]
 cosmwasm-std = { version = "0.16.2" }
-cw-storage-plus = "0.7.0"
-cw2 = "0.7.0"
+cw-storage-plus = "0.8.1"
+cw2 = "0.8.1"
+cw20 = "0.8.1"
 schemars = "0.8.3"
 serde = { version = "1.0.127", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.26" }
-terra-rust-api="0.1"
+terra-rust-api="1.1.1"
 tokio = { version = "1.4", features = ["full"] }
 [dev-dependencies]
 cosmwasm-schema = { version = "0.16.0" }
