@@ -163,18 +163,21 @@ pub fn try_back2project(
         return Err(ContractError::NotRegisteredProject {});
     }
 
-    if info.funds.is_empty() {
+    if info.funds.is_empty() || info.funds[0].amount.u128() < 4*(10^6) {
         return Err(ContractError::NeedCoin{});
     }
 
-    let mut x = PROJECTSTATES.load(deps.storage, _project_id.u128().into())?;
-    
+    let fee = 4*(10^6);
+    let mut fund = info.funds[0].clone();
+    fund.amount = Uint128::new(fund.amount.u128() - fee);
  
     //add new backer to PROJECTSTATE
     let new_baker:BackerState = BackerState{
         backer_wallet:_backer_wallet,
-        amount: info.funds[0].clone(),
+        amount: fund.clone(),
     };
+
+    let mut x = PROJECTSTATES.load(deps.storage, _project_id.u128().into())?;
     x.backer_states.push(new_baker);
     let act = |a: Option<ProjectState>| -> StdResult<ProjectState> { 
         Ok(ProjectState {
@@ -187,25 +190,33 @@ pub fn try_back2project(
     };
     PROJECTSTATES.update(deps.storage, _project_id.u128().into(), act)?;
 
-    let fee = 0;
 
-    let mut fund = info.funds[0].clone();  
-    let amount_projectwallet = (fund.amount.u128()-fee) * 100 / 105;
+    let mut fund_project = fund.clone();  
+    let amount_projectwallet = (fund_project.amount.u128()-fee) * 100 / 105;
     
-    fund.amount = Uint128::new(amount_projectwallet);
+    fund_project.amount = Uint128::new(amount_projectwallet);
     let bank_project = BankMsg::Send { 
         to_address: x.project_wallet.clone(),
-        amount: vec![fund]
+        amount: vec![fund_project]
     };
 
     let config = CONFIG.load(deps.storage).unwrap();
-    let mut fund = info.funds[0].clone();
-    let amount_wefund = (fund.amount.u128()-fee) * 5 / 105;
-    fund.amount = Uint128::new(amount_wefund);
+    let mut fund_wefund = info.funds[0].clone();
+    let amount_wefund = (fund_wefund.amount.u128()-fee) * 5 / 105;
+    fund_wefund.amount = Uint128::new(amount_wefund);
     let bank_wefund = BankMsg::Send { 
         to_address: config.wefund.to_string(),
         amount: vec![fund] 
     };
+
+    let mut collected = 0;
+    for backer in x.backer_states{
+        collected += backer.amount.amount.u128();
+    }
+
+    if collected >= x.project_collected.u128(){
+
+    }
 
     Ok(Response::new()
     .add_messages(vec![
