@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::{Addr, Uint128, Coin};
+use cosmwasm_std::{Addr, Uint128, Coin, StdResult};
 use cw_storage_plus::{Item, Map, U128Key};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -36,7 +36,8 @@ pub const PROJECT_SEQ: Item<Uint128> = Item::new("prj_seq");
 pub const PROJECTSTATES: Map<U128Key, ProjectState> = Map::new("prj");
 
 
-pub fn save_projectstate(deps: DepsMut, Prj: &ProjectState) -> StdResult<()> {
+pub fn save_projectstate(deps: DepsMut, Prj: &ProjectState) 
+-> StdResult<()> {
     // increment id if exists, or return 1
     let id = PROJECT_SEQ.load(deps.storage)?;
     let id = id.checked_add(Uint128::new(1))?;

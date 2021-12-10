@@ -175,7 +175,8 @@ pub fn try_addproject(
         project_about: _project_about,
         project_email: _project_email,
         project_ecosystem: _project_ecosystem,
-        project_category: _project_category
+        project_category: _project_category,
+        backer_states: backer_states,
     };
         
     save_projectstate(deps.storage, &new_project);
