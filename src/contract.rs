@@ -9,7 +9,8 @@ use cw_storage_plus::{U128Key};
 
 use crate::error::ContractError;
 use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg, ProjectResponse};
-use crate::state::{Config, CONFIG, PROJECTSTATES, ProjectState, BackerState};
+use crate::state::{Config, CONFIG, PROJECTSTATES, ProjectState, BackerState,
+                    save_projectstate};
 
 use terra_rust_api::{Terra, GasOptions, PrivateKey};
 use terra_rust_api::core_types::{Coin, StdSignMsg, StdSignature};
@@ -55,12 +56,39 @@ pub fn execute(
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
+
+    pub project_name: String,
+    pub project_wallet: String,
+    pub project_collected: Uint128,
+    pub creator_wallet: String,
+    pub project_website: String,
+    pub project_about: String,
+    pub project_email: String,
+    pub project_ecosystem: String,
+    pub project_category: String,
+
     match msg {
         ExecuteMsg::SetWefund{ wefund } => try_setwefund(deps, info, wefund),
-        ExecuteMsg::AddProject { project_id, project_wallet, project_collected,
-            creator_wallet } => 
-            try_addproject(deps, info, project_id, project_wallet, project_collected,
-                creator_wallet),
+        ExecuteMsg::AddProject { 
+            project_name, 
+            project_wallet, 
+            project_collected,
+            creator_wallet,
+            project_website,
+            project_about,
+            project_email,
+            project_ecosystem,
+            project_category } => 
+            try_addproject(deps, info, 
+                project_name, 
+                project_wallet, 
+                project_collected,
+                creator_wallet,
+                project_website,
+                project_about,
+                project_email,
+                project_ecosystem,
+                project_category),
 
         ExecuteMsg::Back2Project { project_id, backer_wallet } => 
             try_back2project(deps, info, project_id, backer_wallet),
@@ -113,10 +141,15 @@ fn remove_project(deps:DepsMut, _project_id:Uint128)
 pub fn try_addproject(
     deps:DepsMut,
     _info: MessageInfo,
-    _project_id: Uint128, 
-    _project_wallet: String,
-    _project_collected: Uint128,
+    _project_name: String, 
+    _project_wallet: String, 
+    _project_collected: String,
     _creator_wallet: String,
+    _project_website: String,
+    _project_about: String,
+    _project_email: String,
+    _project_ecosystem: String,
+    _project_category: String
 ) -> Result<Response, ContractError> 
 {
     let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into());
@@ -144,13 +177,19 @@ pub fn try_addproject(
 }
     let backer_states = Vec::new();
     let new_project:ProjectState = ProjectState{
-        project_id: _project_id, 
-        project_wallet: _project_wallet,
+        project_id: Uint128::zero(),
+        project_name: _project_name, 
+        project_wallet: _project_wallet, 
         project_collected: _project_collected,
         creator_wallet: _creator_wallet,
-        backer_states};
+        project_website: _project_website ,
+        project_about: _project_about,
+        project_email: _project_email,
+        project_ecosystem: _project_ecosystem,
+        project_category: _project_category
+    };
         
-    PROJECTSTATES.save(deps.storage, _project_id.u128().into(), &new_project)?;
+    save_projectstate(deps.storage, &new_project);
 
     Ok(Response::new()
         .add_attribute("action", "add project"))
@@ -187,8 +226,14 @@ pub fn try_back2project(
     let act = |a: Option<ProjectState>| -> StdResult<ProjectState> { 
         Ok(ProjectState {
             project_id: a.clone().unwrap().project_id,
+            project_name: a.clone().unwrap().project_name,
             project_wallet: a.clone().unwrap().project_wallet,
             project_collected: a.clone().unwrap().project_collected,
+            project_website: a.clone().unwrap().project_website,
+            project_about: a.clone().unwrap().project_about,
+            project_email: a.clone().unwrap().project_email,
+            project_ecosystem: a.clone().unwrap().project_ecosystem,
+            project_category: a.clone().unwrap().project_category,
             creator_wallet: a.clone().unwrap().creator_wallet,
             backer_states: x.backer_states.clone(),
         })
@@ -270,26 +315,10 @@ fn query_backer(deps:Deps, id:Uint128) -> StdResult<Vec<BackerState>>{
     let x = PROJECTSTATES.load(deps.storage, id.u128().into())?;
     Ok(x.backer_states)
 }
-fn query_project(deps:Deps, id:Uint128) -> StdResult<ProjectResponse>{
+fn query_project(deps:Deps, id:Uint128) -> StdResult<ProjectState>{
     let x = PROJECTSTATES.load(deps.storage, id.u128().into())?;
     
-    let denom = String::from("uusd");
-    let balance: BalanceResponse = deps.querier.query(
-        &QueryRequest::Bank(BankQuery::Balance {
-            address: x.project_wallet.clone().to_string(),
-            denom,
-        }
-    ))?;
-    
-    let res = ProjectResponse{
-        project_id: x.project_id, 
-        project_wallet: x.project_wallet.clone(),
-        project_collected: x.project_collected,
-        creator_wallet: x.creator_wallet,
-        balance: balance.amount.amount
-    };
-
-    Ok(res)
+    Ok(x)
 }
 
 #[cfg(test)]
