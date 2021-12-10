@@ -3,14 +3,14 @@
   "title": "Config",
   "type": "object",
   "required": [
-    "cw20_addr",
-    "owner"
+    "owner",
+    "wefund"
   ],
   "properties": {
-    "cw20_addr": {
+    "owner": {
       "$ref": "#/definitions/Addr"
     },
-    "owner": {
+    "wefund": {
       "$ref": "#/definitions/Addr"
     }
   },

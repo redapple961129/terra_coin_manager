@@ -5,19 +5,23 @@
     {
       "type": "object",
       "required": [
-        "get_pot"
+        "get_config"
       ],
       "properties": {
-        "get_pot": {
-          "type": "object",
-          "required": [
-            "id"
-          ],
-          "properties": {
-            "id": {
-              "$ref": "#/definitions/Uint128"
-            }
-          }
+        "get_config": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "get_all_project"
+      ],
+      "properties": {
+        "get_all_project": {
+          "type": "object"
         }
       },
       "additionalProperties": false
@@ -31,11 +35,51 @@
         "get_project": {
           "type": "object",
           "required": [
-            "id"
+            "project_id"
           ],
           "properties": {
-            "id": {
+            "project_id": {
               "$ref": "#/definitions/Uint128"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "get_backer"
+      ],
+      "properties": {
+        "get_backer": {
+          "type": "object",
+          "required": [
+            "project_id"
+          ],
+          "properties": {
+            "project_id": {
+              "$ref": "#/definitions/Uint128"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "get_balance"
+      ],
+      "properties": {
+        "get_balance": {
+          "type": "object",
+          "required": [
+            "wallet"
+          ],
+          "properties": {
+            "wallet": {
+              "type": "string"
             }
           }
         }

@@ -2,9 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "InstantiateMsg",
   "type": "object",
-  "required": [
-    "cw20_addr"
-  ],
   "properties": {
     "admin": {
       "type": [
@@ -12,9 +9,11 @@
         "null"
       ]
     },
-    "cw20_addr": {
-      "description": "cw20_addr is the address of the allowed cw20 token",
-      "type": "string"
+    "wefund": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   }
 }

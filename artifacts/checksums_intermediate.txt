@@ -1,0 +1,1 @@
+3b05eede5e935f59b2bd27b73051b58877f12a260febd20518b4b44770449b7d  ./target/wasm32-unknown-unknown/release/terra_coin_manager.wasm
