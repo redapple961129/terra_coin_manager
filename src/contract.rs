@@ -174,7 +174,7 @@ pub fn try_addproject(
         backer_states: backer_states,
     };
         
-    save_projectstate(deps.storage, &new_project);
+    save_projectstate(deps, &new_project);
 
     Ok(Response::new()
         .add_attribute("action", "add project"))
