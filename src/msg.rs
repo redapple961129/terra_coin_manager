@@ -12,8 +12,11 @@ pub struct InstantiateMsg {
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     SetWefund { wefund: String },
-    AddProject { project_id: Uint128, project_wallet: String, 
-        project_collected: Uint128, creator_wallet: String },
+    AddProject { project_name: String, project_wallet: String, 
+        project_collected: Uint128, creator_wallet: String , 
+        project_website: String, project_about: String,
+        project_email: String, project_ecosystem:String,
+        project_category:String},
     Back2Project { project_id: Uint128, backer_wallet: String},
     CompleteProject{ project_id:Uint128 },
     FailProject{project_id:Uint128 },

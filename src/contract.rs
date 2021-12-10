@@ -56,17 +56,6 @@ pub fn execute(
     info: MessageInfo,
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
-
-    pub project_name: String,
-    pub project_wallet: String,
-    pub project_collected: Uint128,
-    pub creator_wallet: String,
-    pub project_website: String,
-    pub project_about: String,
-    pub project_email: String,
-    pub project_ecosystem: String,
-    pub project_category: String,
-
     match msg {
         ExecuteMsg::SetWefund{ wefund } => try_setwefund(deps, info, wefund),
         ExecuteMsg::AddProject { 
@@ -143,7 +132,7 @@ pub fn try_addproject(
     _info: MessageInfo,
     _project_name: String, 
     _project_wallet: String, 
-    _project_collected: String,
+    _project_collected: Uint128,
     _creator_wallet: String,
     _project_website: String,
     _project_about: String,
