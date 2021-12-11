@@ -12,11 +12,6 @@ use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg, ProjectResponse};
 use crate::state::{Config, CONFIG, PROJECTSTATES, ProjectState, BackerState,
                     save_projectstate};
 
-use terra_rust_api::{Terra, GasOptions, PrivateKey};
-use terra_rust_api::core_types::{Coin, StdSignMsg, StdSignature};
-use terra_rust_api::messages::{MsgSend, Message};
-use bitcoin::secp256k1::Secp256k1;
-
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:cw20-example";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -141,10 +136,10 @@ pub fn try_addproject(
     _project_category: String
 ) -> Result<Response, ContractError> 
 {
-    let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into());
-    if res != Ok(None) {//exist
-        return Err(ContractError::AlreadyRegisteredProject {});
-    }
+    // let res = PROJECTSTATES.may_load(deps.storage, _project_id.u128().into());
+    // if res != Ok(None) {//exist
+    //     return Err(ContractError::AlreadyRegisteredProject {});
+    // }
 {
     // let all: StdResult<Vec<_>> = PROJECTCONTRACTS.range(deps.storage, None, None, 
     //     cosmwasm_std::Order::Ascending).collect();
