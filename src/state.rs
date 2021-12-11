@@ -44,6 +44,7 @@ pub fn save_projectstate(deps: DepsMut, Prj: &ProjectState)
     PROJECT_SEQ.save(deps.storage, &id)?;
 
     // save pot with id
-    Prj.project_id = id.clone();
-    PROJECTSTATES.save(deps.storage, id.u128().into(), Prj)
+    let mut project = Prj.clone();
+    project.project_id = id.clone();
+    PROJECTSTATES.save(deps.storage, id.u128().into(), &project)
 }

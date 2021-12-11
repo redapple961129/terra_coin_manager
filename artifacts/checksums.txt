@@ -1,1 +1,1 @@
-b92e04c23c08322ebd45702a7d42506a49a70f8d6de394fffa76a65b0630b324  terra_coin_manager.wasm
+7c357b29e50ada62d0d75366d2863f6da4758b8228681becbd777e069864af80  terra_coin_manager.wasm

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ExecuteMsg",
-  "anyOf": [
+  "oneOf": [
     {
       "type": "object",
       "required": [
@@ -32,21 +32,41 @@
           "type": "object",
           "required": [
             "creator_wallet",
+            "project_about",
+            "project_category",
             "project_collected",
-            "project_id",
-            "project_wallet"
+            "project_ecosystem",
+            "project_email",
+            "project_name",
+            "project_wallet",
+            "project_website"
           ],
           "properties": {
             "creator_wallet": {
               "type": "string"
             },
+            "project_about": {
+              "type": "string"
+            },
+            "project_category": {
+              "type": "string"
+            },
             "project_collected": {
               "$ref": "#/definitions/Uint128"
             },
-            "project_id": {
-              "$ref": "#/definitions/Uint128"
+            "project_ecosystem": {
+              "type": "string"
+            },
+            "project_email": {
+              "type": "string"
+            },
+            "project_name": {
+              "type": "string"
             },
             "project_wallet": {
+              "type": "string"
+            },
+            "project_website": {
               "type": "string"
             }
           }

@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/dev/0Work/terra_coin_manager/target/debug/build/typenum-74f4fd522879e552/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/dev/0Work/terra_coin_manager/target/debug/build/typenum-74f4fd522879e552/out/op.rs

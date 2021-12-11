@@ -1,0 +1,1 @@
+/home/dev/0Work/terra_coin_manager/target/debug/examples/schema: /home/dev/0Work/terra_coin_manager/examples/schema.rs /home/dev/0Work/terra_coin_manager/src/contract.rs /home/dev/0Work/terra_coin_manager/src/error.rs /home/dev/0Work/terra_coin_manager/src/lib.rs /home/dev/0Work/terra_coin_manager/src/msg.rs /home/dev/0Work/terra_coin_manager/src/state.rs

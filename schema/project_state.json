@@ -5,9 +5,15 @@
   "required": [
     "backer_states",
     "creator_wallet",
+    "project_about",
+    "project_category",
     "project_collected",
+    "project_ecosystem",
+    "project_email",
     "project_id",
-    "project_wallet"
+    "project_name",
+    "project_wallet",
+    "project_website"
   ],
   "properties": {
     "backer_states": {
@@ -19,13 +25,31 @@
     "creator_wallet": {
       "type": "string"
     },
+    "project_about": {
+      "type": "string"
+    },
+    "project_category": {
+      "type": "string"
+    },
     "project_collected": {
       "$ref": "#/definitions/Uint128"
+    },
+    "project_ecosystem": {
+      "type": "string"
+    },
+    "project_email": {
+      "type": "string"
     },
     "project_id": {
       "$ref": "#/definitions/Uint128"
     },
+    "project_name": {
+      "type": "string"
+    },
     "project_wallet": {
+      "type": "string"
+    },
+    "project_website": {
       "type": "string"
     }
   },
