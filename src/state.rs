@@ -32,7 +32,7 @@ pub struct ProjectState{
     pub project_category: String,
     pub backer_states:Vec<BackerState>,
 }
-pub const PROJECT_SEQ Item<Uint128> = Item::new("prj_seq");
+pub const PROJECT_SEQ: Item<Uint128> = Item::new("prj_seq");
 pub const PROJECTSTATES: Map<U128Key, ProjectState> = Map::new("prj");
 
 
